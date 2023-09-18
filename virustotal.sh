@@ -31,26 +31,10 @@ function ip_existe {
   fi
 }
 
-# Función para verificar si una cadena es una IP válida
-function es_ip_valida {
-  local ip="$1"
-  local regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-  regex+='(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-  regex+='(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-  regex+='(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
-  
-  if [[ "$ip" =~ $regex ]]; then
-    return 0  # Es una IP válida
-  else
-    return 1  # No es una IP válida
-  fi
-}
-
 # Leer cada línea del archivo ips.txt
 while IFS=, read -r _ ip _; do
-  # Verificar si la IP actual es válida
-  if ! es_ip_valida "$ip"; then
-    echo -e "${COLOR_RED}La IP $ip no tiene un formato válido y será omitida.${COLOR_RESET}"
+  # Verificar si la IP actual es "origen" y omitirla
+  if [[ "$ip" == "origen" ]]; then
     continue
   fi
 
@@ -83,12 +67,14 @@ while IFS=, read -r _ ip _; do
             # Mostrar el resultado en colores y con números
             echo -e "${COLOR_GREEN}Se han encontrado coincidencias en${COLOR_RESET} ${COLOR_PURPLE}${ip}${COLOR_RESET}, valores - ${COLOR_ORANGE}Malicious: ${COLOR_RED}${malicious:-0}${COLOR_RESET}, ${COLOR_ORANGE}Suspicious: ${COLOR_RED}${suspicious:-0}${COLOR_RESET}, ${COLOR_ORANGE}Undetected: ${COLOR_RED}${undetected}${COLOR_RESET}"
             encontrado=1
-
-            # Verificar si la IP existe en /var/www/html/ip.txt
-            if ! ip_existe "$ip"; then
-              echo -e "${COLOR_YELLOW}Agregando la IP al archivo.${COLOR_RESET}"
+              # Verificar si la IP existe en /var/www/html/ip.txt
+            if ip_existe "$ip"; then
+              echo -e "${COLOR_BLUE}La IP está en el archivo.${COLOR_RESET}"
+            else
+              echo -e "${COLOR_RED}La IP no se encuentra en el archivo.${COLOR_RESET}"
               # Agregar la IP al archivo /var/www/html/ip.txt
               agregar_ip "$ip"
+              echo -e "${COLOR_YELLOW}La IP se agregó al archivo.${COLOR_RESET}"
             fi
           fi
         fi
