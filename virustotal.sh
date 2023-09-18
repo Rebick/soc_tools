@@ -59,12 +59,6 @@ while IFS=, read -r _ ip _; do
     continue
   fi
 
-  # Verificar si la IP ya existe en /var/www/html/ip.txt
-  if ip_existe "$ip"; then
-    echo -e "${COLOR_BLUE}La IP $ip está en el archivo y no se procesará.${COLOR_RESET}"
-    continue
-  fi
-
   # Realizar la solicitud HTTP y guardar la respuesta en una variable
   response=$(curl -s "https://www.virustotal.com/api/v3/ip_addresses/$ip" \
     -H "x-apikey: ac125776319a9ee15ee73b2cb43227393106543138a009182c315b4243891dad")
